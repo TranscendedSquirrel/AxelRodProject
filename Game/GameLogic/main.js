@@ -203,6 +203,49 @@ class Strategy3 extends Strategy {
 
 }
 
+/*
+Resurrection
+The AI will play 'silent' in the first 5 turns.
+After 5 turns, the AI will play 'betray' if the
+player had 'betray'ed the previous 5 turns. 
+Otherwise, it follows "Tit for Tat".
+*/
+class Strategy4 extends Strategy {
+
+    constructor(ai: Ai) {
+        super(ai)
+    }
+
+    //return true if betray, return false if silent
+    getNextMove() : boolean {
+        let enemyMoves = this.parentAi.getEnemyMoves()       
+        let currentRound = enemyMoves.length - 1;
+
+
+    }
+
+}
+
+/* Grumpy Strategy:
+The AI always plays 'silent', unless
+they are "grumpy", in which they will
+play 'betray'. */
+class Strategy5 extends Strategy {
+
+    constructor(ai: Ai) {
+        super(ai)
+    }
+
+    //return true if betray, return false if silent
+    getNextMove() : boolean {
+        let enemyMoves = this.parentAi.getEnemyMoves()       
+        let currentRound = enemyMoves.length - 1;
+
+
+    }
+
+}
+
 /* Event handler for receiving the opponent's choice */
 // cA - Silent
 // cB - Betray
