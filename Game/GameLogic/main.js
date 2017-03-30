@@ -219,9 +219,18 @@ class Strategy4 extends Strategy {
     //return true if betray, return false if silent
     getNextMove() : boolean {
         let enemyMoves = this.parentAi.getEnemyMoves()       
-        let currentRound = enemyMoves.length - 1;
+        let currentRound = enemyMoves.length + 1;
 
-
+        if (currentRound <= 5) {
+            return false   
+        } else if (currentRound > 5) {
+            for(let i = enemyMoves.length - 1; i >= enemyMoves.length - 5; i --) {
+                if(!enemyMoves[i]){
+                    return enemyMoves[enemyMoves.length - 1];
+                }   
+            }
+            return true
+        }
     }
 
 }
@@ -239,11 +248,21 @@ class Strategy5 extends Strategy {
     //return true if betray, return false if silent
     getNextMove() : boolean {
         let enemyMoves = this.parentAi.getEnemyMoves()       
-        let currentRound = enemyMoves.length - 1;
-
-
+        let currentRound = enemyMoves.length + 1;
+        let happiness = 7;
+        
+        if(enemyMoves[enemyMoves.length] == true) {
+            happiness -= 1
+        } else {
+            happiness += 1
+        }
+        
+        if(happiness > 5) {
+            return false
+        } else if(happiness <= 5 {
+            return true
+        }
     }
-
 }
 
 /* Event handler for receiving the opponent's choice */
@@ -343,6 +362,14 @@ function startGameLoop() {
                 inputted = [false, false]
                 roundsCompleted++
                 roundInitialised = false
+                
+                //////
+                //foreignBetray = opponent choice
+                //localScore = score of the player
+                //foreignScore = score of the opponent
+                
+                basic.showString("Opp. played"+foreignBetray)
+                basic.showString("You have"+localScore+"years. Your opp. has"+foreignScore+"years.")
             }
         }
 
