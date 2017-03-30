@@ -15,6 +15,7 @@ enum STATE {
     VER_PLAYER,
     VER_COMPLETE,
     GAME,
+    POST_ROUND,
     POST_GAME
 }
 let state = STATE.INIT
@@ -82,11 +83,14 @@ class Ai {
         this.aiMoves = player.getMoves()
         this.enemyMoves = []
         this.strategies = []
-        this.currentStratIndex = 0
+        this.currentStratIndex = 4
 
         this.strategies.push(new Strategy1(this))
         this.strategies.push(new Strategy2(this))
         this.strategies.push(new Strategy3(this))
+        this.strategies.push(new Strategy4(this))
+        this.strategies.push(new Strategy5(this))
+
     }
 
     public getAiMoves(): boolean[] {
@@ -217,17 +221,17 @@ class Strategy4 extends Strategy {
     }
 
     //return true if betray, return false if silent
-    getNextMove() : boolean {
-        let enemyMoves = this.parentAi.getEnemyMoves()       
+    getNextMove(): boolean {
+        let enemyMoves = this.parentAi.getEnemyMoves()
         let currentRound = enemyMoves.length + 1;
 
         if (currentRound <= 5) {
-            return false   
-        } else if (currentRound > 5) {
-            for(let i = enemyMoves.length - 1; i >= enemyMoves.length - 5; i --) {
-                if(!enemyMoves[i]){
+            return false
+        } else {
+            for (let i = enemyMoves.length - 1; i >= enemyMoves.length - 5; i--) {
+                if (!enemyMoves[i]) {
                     return enemyMoves[enemyMoves.length - 1];
-                }   
+                }
             }
             return true
         }
@@ -246,20 +250,20 @@ class Strategy5 extends Strategy {
     }
 
     //return true if betray, return false if silent
-    getNextMove() : boolean {
-        let enemyMoves = this.parentAi.getEnemyMoves()       
+    getNextMove(): boolean {
+        let enemyMoves = this.parentAi.getEnemyMoves()
         let currentRound = enemyMoves.length + 1;
         let happiness = 7;
-        
-        if(enemyMoves[enemyMoves.length] == true) {
+
+        if (enemyMoves[enemyMoves.length] == true) {
             happiness -= 1
         } else {
             happiness += 1
         }
-        
-        if(happiness > 5) {
+
+        if (happiness > 5) {
             return false
-        } else if(happiness <= 5 {
+        } else {
             return true
         }
     }
@@ -362,14 +366,17 @@ function startGameLoop() {
                 inputted = [false, false]
                 roundsCompleted++
                 roundInitialised = false
-                
+
                 //////
                 //foreignBetray = opponent choice
                 //localScore = score of the player
                 //foreignScore = score of the opponent
-                
-                basic.showString("Opp. played"+foreignBetray)
-                basic.showString("You have"+localScore+"years. Your opp. has"+foreignScore+"years.")
+
+                //basic.showString("O " + foreignBetray ? "B" : "S")
+                //basic.showString("U " + localPlayer.getYears() + " O " + foreignScore)
+
+                basic.showString(localPlayer.getYears() + ":" + foreignScore);
+                state = STATE.POST_ROUND;
             }
         }
 
@@ -386,11 +393,11 @@ function endGame() {
     let localScore = localPlayer.getYears()
 
     if (localScore < foreignScore) {
-        conclusion = "WIN"
+        conclusion = "W"
     } else if (localScore > foreignScore) {
-        conclusion = "LOSS"
+        conclusion = "L"
     } else {
-        conclusion = "DRAW"
+        conclusion = "D"
     }
     basic.showString("" + conclusion + " " + localScore + ":" + foreignScore)
 }
@@ -408,6 +415,10 @@ function main() {
                 break
             case STATE.VER_COMPLETE:
                 startGameLoop()
+                break
+            case STATE.POST_ROUND:
+                basic.pause(500)
+                state = STATE.GAME;
                 break
             case STATE.POST_GAME:
                 endGame()
