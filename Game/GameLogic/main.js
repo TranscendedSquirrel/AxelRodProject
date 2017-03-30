@@ -9,6 +9,8 @@ let localPlayer: Player
 let foreignBetray: boolean
 let foreignScore = 0
 
+let test = 0;
+
 /* STATE enumeration */
 enum STATE {
     INIT = 1,
@@ -16,6 +18,7 @@ enum STATE {
     VER_COMPLETE,
     GAME,
     POST_ROUND,
+    POST_ROUND_WAIT,
     POST_GAME
 }
 let state = STATE.INIT
@@ -83,7 +86,19 @@ class Ai {
         this.aiMoves = player.getMoves()
         this.enemyMoves = []
         this.strategies = []
-        this.currentStratIndex = 4
+
+        let k = Math.random(1) * 10;
+        if (k < 2) {
+            this.currentStratIndex = 0;
+        } else if (k < 4) {
+            this.currentStratIndex = 1;
+        } else if (k < 6) {
+            this.currentStratIndex = 2;
+        } else if (k < 8) {
+            this.currentStratIndex = 3;
+        } else {
+            this.currentStratIndex = 4;
+        }
 
         this.strategies.push(new Strategy1(this))
         this.strategies.push(new Strategy2(this))
@@ -308,11 +323,19 @@ function handleInput(buttonName: string) {
 
 /* Button A (Left) event handler */
 input.onButtonPressed(Button.A, () => {
+    if (state == STATE.POST_ROUND) {
+        return;
+    }
+
     handleInput("A")
 })
 
 /* Button B (Right) event handler */
 input.onButtonPressed(Button.B, () => {
+    if (state == STATE.POST_ROUND) {
+        return;
+    }
+
     handleInput("B")
 })
 
@@ -348,6 +371,7 @@ function startGameLoop() {
             }
 
             if (inputted[0] && inputted[1]) {
+                state = STATE.POST_ROUND;
 
                 let localBetray = localPlayer.getNextMove()
 
@@ -367,16 +391,8 @@ function startGameLoop() {
                 roundsCompleted++
                 roundInitialised = false
 
-                //////
-                //foreignBetray = opponent choice
-                //localScore = score of the player
-                //foreignScore = score of the opponent
-
-                //basic.showString("O " + foreignBetray ? "B" : "S")
-                //basic.showString("U " + localPlayer.getYears() + " O " + foreignScore)
-
                 basic.showString(localPlayer.getYears() + ":" + foreignScore);
-                state = STATE.POST_ROUND;
+                returnToGame();
             }
         }
 
@@ -402,6 +418,19 @@ function endGame() {
     basic.showString("" + conclusion + " " + localScore + ":" + foreignScore)
 }
 
+/* Waits 3 seconds, returns to game */
+function returnToGame() {
+    state = STATE.POST_ROUND_WAIT
+    game.startStopwatch()
+
+    while (true) {
+        if (game.currentTime() >= 2000) {
+            state = STATE.GAME;
+            break;
+        }
+    }
+}
+
 /* Main function */
 function main() {
     basic.forever(() => {
@@ -415,10 +444,6 @@ function main() {
                 break
             case STATE.VER_COMPLETE:
                 startGameLoop()
-                break
-            case STATE.POST_ROUND:
-                basic.pause(500)
-                state = STATE.GAME;
                 break
             case STATE.POST_GAME:
                 endGame()
