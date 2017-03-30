@@ -270,35 +270,37 @@ function startGameLoop() {
 
     basic.forever(() => {
 
-        if (!roundInitialised) {
-            basic.showNumber((roundsCompleted + 1))
+        if (state == STATE.GAME) {
+            if (!roundInitialised) {
+                basic.showNumber((roundsCompleted + 1))
 
-            if (!localPlayer.isHumanPlayer()) {
-                localPlayer.respond()
-                inputted[0] = true
+                if (!localPlayer.isHumanPlayer()) {
+                    localPlayer.respond()
+                    inputted[0] = true
+                }
+
             }
 
-        }
+            if (inputted[0] && inputted[1]) {
 
-        if (state == STATE.GAME && inputted[0] && inputted[1]) {
+                let localBetray = localPlayer.getNextMove()
 
-            let localBetray = localPlayer.getNextMove()
+                if (localBetray && foreignBetray) {
+                    localPlayer.addYears(2)
+                    foreignScore += 2
+                } else if (!(localBetray) && !(foreignBetray)) {
+                    localPlayer.addYears(1)
+                    foreignScore += 1
+                } else if (!(localBetray) && foreignBetray) {
+                    localPlayer.addYears(3)
+                } else {
+                    foreignScore += 3
+                }
 
-            if (localBetray && foreignBetray) {
-                localPlayer.addYears(2)
-                foreignScore += 2
-            } else if (!(localBetray) && !(foreignBetray)) {
-                localPlayer.addYears(1)
-                foreignScore += 1
-            } else if (!(localBetray) && foreignBetray) {
-                localPlayer.addYears(3)
-            } else {
-                foreignScore += 3
+                inputted = [false, false]
+                roundsCompleted++
+                roundInitialised = false
             }
-
-            inputted = [false, false]
-            roundsCompleted++
-            roundInitialised = false
         }
 
         if (roundsCompleted >= MAX_ROUNDS) {
@@ -309,7 +311,7 @@ function startGameLoop() {
 
 /* Concludes the game */
 function endGame() {
-    basic.pause(2000)
+    basic.pause(500)
     let conclusion: string
     let localScore = localPlayer.getYears()
 
