@@ -1,0 +1,11 @@
+PRESENTATION PLAN
+
+Start:
+
+Explain prisoners dilemna - 2 Players, Each turn they get a choice (betray or silence), This determines the final score.
+
+PvP Version (Coded onto the microbit, allows two microbit players to play vs each other.)
+
+PvE Version(Several established strategies implemented onto the micro bit each game it will pick one of these random strats.)
+
+Hint application(Python Application, uses machine learning to determine the strategy of the opponent, uses "anti-strategies" to determine the players next "best" move.)
