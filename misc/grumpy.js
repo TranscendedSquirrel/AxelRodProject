@@ -1,3 +1,8 @@
+/* Grumpy Strategy:
+The AI always plays 'silent', unless
+they are "grumpy", in which they will
+play 'betray'. */
+
 /*let aimoves: string[] = [];
 let enemymoves: string[] = [];*/
 
