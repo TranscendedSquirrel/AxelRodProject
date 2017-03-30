@@ -57,7 +57,7 @@ class Player {
     }
 
     public isHumanPlayer(): boolean {
-        return this.isHuman;
+        return this.isHuman
     }
 
     public respond(): void {
@@ -84,8 +84,9 @@ class Ai {
         this.strategies = []
         this.currentStratIndex = 0
 
+        this.strategies.push(new Strategy1(this))
         this.strategies.push(new Strategy2(this))
-        //this.strategies.push(new Strategy2(this))
+        this.strategies.push(new Strategy3(this))
     }
 
     public getAiMoves(): boolean[] {
@@ -105,9 +106,9 @@ class Ai {
     }
 
     public getDecision(): boolean {
-        let decision = this.strategies[this.currentStratIndex].getNextMove();
-        this.aiMoves.push(decision);
-        return decision;
+        let decision = this.strategies[this.currentStratIndex].getNextMove()
+        this.aiMoves.push(decision)
+        return decision
     }
 }
 
@@ -120,7 +121,7 @@ class Strategy {
     }
 
     getNextMove(): boolean {
-        return true;
+        return true
     }
 }
 
@@ -130,16 +131,15 @@ class Strategy {
 class Strategy1 extends Strategy {
 
     constructor(ai: Ai) {
-        super(ai);
+        super(ai)
     }
 
     getNextMove(): boolean {
         let enemyMoves = this.parentAi.getEnemyMoves()
-        return enemyMoves.length > 0 ? enemyMoves[enemyMoves.length - 1] : true;
+        return enemyMoves.length > 0 ? enemyMoves[enemyMoves.length - 1] : true
     }
 
 }
-
 
 /* Unforgiving
     If the opponent has betrayed before, the AI will
@@ -148,11 +148,11 @@ class Strategy1 extends Strategy {
 class Strategy2 extends Strategy {
 
     constructor(ai: Ai) {
-        super(ai);
+        super(ai)
     }
 
     getNextMove(): boolean {
-        let enemyMoves = this.parentAi.getEnemyMoves();
+        let enemyMoves = this.parentAi.getEnemyMoves()
         for (let i = 0; i < enemyMoves.length; i++) {
             if (enemyMoves[i]) {
                 return true
@@ -162,81 +162,127 @@ class Strategy2 extends Strategy {
     }
 }
 
+/* Champion
+
+
+*/
+class Strategy3 extends Strategy {
+
+    constructor(ai: Ai) {
+        super(ai)
+    }
+
+    getNextMove(): boolean {
+        let enemyMoves = this.parentAi.getEnemyMoves()
+        let start = true
+        let percent = 0
+        let currentRound = enemyMoves.length - 1;
+
+        if (currentRound < 6) {
+            return false
+        } else if (currentRound < 11) {
+            return enemyMoves[enemyMoves.length - 1]
+        } else {
+            if (start) {
+                for (let i = 0; i < 11; i++) {
+                    if (enemyMoves[i]) {
+                        percent += 1
+                    }
+                }
+                start = false
+            }
+
+            if (enemyMoves[enemyMoves.length - 1] || percent > 5) {
+                return enemyMoves[enemyMoves.length - 1]
+            } else {
+                return true
+            }
+        }
+
+    }
+
+}
+
 /* Event handler for receiving the opponent's choice */
+// cA - Silent
+// cB - Betray
 radio.onDataPacketReceived(({receivedString}) => {
 
     if (state == STATE.VER_PLAYER) {
 
-        verification[1] = true;
+        verification[1] = true
 
     } else if (state == STATE.GAME) {
+
         if (receivedString[0] == "c") {
-            foreignBetray = receivedString[1] == "B"
-            inputted[1] = true;
+            foreignBetray = receivedString[1] === "B"
+            inputted[1] = true
         }
 
-        if (!localPlayer.isHumanPlayer()) {
-            localPlayer.respond();
-            inputted[0] = true;
-        }
     }
 
 })
 
 /* function that handles button presses */
 function handleInput(buttonName: string) {
-    let stringToSend = buttonName === "A" ? "cA" : "cB";
+    let stringToSend = buttonName === "A" ? "cA" : "cB"
 
     if (state == STATE.VER_PLAYER) {
         if (!verification[0]) {
-            verification[0] = true;
-            localPlayer = new Player(buttonName === "A");
-            radio.sendString(stringToSend);
+            verification[0] = true
+            localPlayer = new Player(buttonName === "A")
+            radio.sendString(stringToSend)
         }
     } else if (state == STATE.GAME && !inputted[0] && localPlayer.isHumanPlayer()) {
-        localPlayer.addMove(buttonName === "B");
-        inputted[0] = true;
-        radio.sendString(stringToSend);
+        localPlayer.addMove(buttonName === "B")
+        inputted[0] = true
+        radio.sendString(stringToSend)
     }
 }
 
 /* Button A (Left) event handler */
 input.onButtonPressed(Button.A, () => {
-    handleInput("A");
+    handleInput("A")
 })
 
 /* Button B (Right) event handler */
 input.onButtonPressed(Button.B, () => {
-    handleInput("B");
+    handleInput("B")
 })
 
 /* Begins the player verification process */
 function startVerification() {
     state = STATE.VER_PLAYER
-    basic.showString("V");
+    basic.showString("V")
 }
 
 /* Checks if the verification has finished */
 function checkVerification() {
     if (verification[0] && verification[1]) {
-        state = STATE.VER_COMPLETE;
+        state = STATE.VER_COMPLETE
     }
 }
 
 /* Game loop */
 function startGameLoop() {
-    state = STATE.GAME;
-    let roundInitialised = false;
+    state = STATE.GAME
+    let roundInitialised = false
 
     basic.forever(() => {
 
         if (!roundInitialised) {
             basic.showNumber((roundsCompleted + 1))
+
+            if (!localPlayer.isHumanPlayer()) {
+                localPlayer.respond()
+                inputted[0] = true
+            }
+
         }
 
         if (state == STATE.GAME && inputted[0] && inputted[1]) {
 
-            let localBetray = localPlayer.getNextMove();
+            let localBetray = localPlayer.getNextMove()
 
             if (localBetray && foreignBetray) {
                 localPlayer.addYears(2)
@@ -250,13 +296,13 @@ function startGameLoop() {
                 foreignScore += 3
             }
 
-            inputted = [false, false];
+            inputted = [false, false]
             roundsCompleted++
             roundInitialised = false
         }
 
         if (roundsCompleted >= MAX_ROUNDS) {
-            state = STATE.POST_GAME;
+            state = STATE.POST_GAME
         }
     })
 }
@@ -264,8 +310,8 @@ function startGameLoop() {
 /* Concludes the game */
 function endGame() {
     basic.pause(2000)
-    let conclusion: string;
-    let localScore = localPlayer.getYears();
+    let conclusion: string
+    let localScore = localPlayer.getYears()
 
     if (localScore < foreignScore) {
         conclusion = "WIN"
@@ -283,19 +329,19 @@ function main() {
 
         switch (state) {
             case STATE.INIT:
-                startVerification();
-                break;
+                startVerification()
+                break
             case STATE.VER_PLAYER:
-                checkVerification();
-                break;
+                checkVerification()
+                break
             case STATE.VER_COMPLETE:
-                startGameLoop();
-                break;
+                startGameLoop()
+                break
             case STATE.POST_GAME:
-                endGame();
+                endGame()
         }
 
     })
 }
 
-main();
+main()
